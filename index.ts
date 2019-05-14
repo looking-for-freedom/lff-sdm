@@ -35,6 +35,7 @@ import {
 import {
     configureSdm,
     createSoftwareDeliveryMachine,
+    Version,
 } from "@atomist/sdm-core";
 import {
     KubernetesApplication,
@@ -62,6 +63,12 @@ function machine(cfg: SoftwareDeliveryMachineConfiguration): SoftwareDeliveryMac
         configuration: cfg,
     });
 
+    const version = new Version()
+        .with({
+            name: "node-versioner",
+            versioner: nodeVersioner,
+            logInterpreter: LogSuppressor,
+        });
     const selfBuild = new GoalWithFulfillment({
         uniqueName: "selfBuilder",
         environment: IndependentOfEnvironment,
@@ -78,7 +85,8 @@ function machine(cfg: SoftwareDeliveryMachineConfiguration): SoftwareDeliveryMac
     const selfDeploy = new KubernetesDeploy({ environment: "production" })
         .with({ name: "@atomist/k8s-sdm_minikube", applicationData: k8sAppData });
     const selfGoalSet = goals("Self Build")
-        .plan(selfBuild)
+        .plan(version)
+        .plan(selfBuild).after(version)
         .plan(selfDeploy).after(selfBuild);
     sdm.addGoalContributions(whenPushSatisfies(selfTest).setGoals(selfGoalSet));
 
@@ -88,6 +96,10 @@ function machine(cfg: SoftwareDeliveryMachineConfiguration): SoftwareDeliveryMac
 const selfTest = pushTest("SDM, build thyself", async p => p.id.repo === "lff-sdm" && p.id.owner === "looking-for-freedom");
 
 const image = "atmhoff/lff-sdm:1.0.0";
+
+async function nodeVersioner(): Promise<string> {
+    return "1.0.0-" + formatDate();
+}
 
 const BuildSelf: ExecuteGoal = async gi => {
     const log = gi.progressLog;
