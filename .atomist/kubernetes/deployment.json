@@ -1,0 +1,98 @@
+{
+  "spec": {
+    "template": {
+      "metadata": {
+        "annotations": {
+          "atomist.com/ts": "0"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "ATOMIST_CONFIG_PATH",
+                "value": "/opt/atm/atomist-config.json"
+              },
+              {
+                "name": "ATOMIST_GOAL_LAUNCHER",
+                "value": "kubernetes"
+              },
+              {
+                "name": "ATOMIST_POD_NAMESPACE",
+                "valueFrom": {
+                  "fieldRef": {
+                    "fieldPath": "metadata.namespace"
+                  }
+                }
+              },
+              {
+                "name": "FORCE_COLOR",
+                "value": "1"
+              }
+            ],
+            "livenessProbe": {
+              "httpGet": {
+                "path": "/health",
+                "port": "http",
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 20,
+              "timeoutSeconds": 3,
+              "periodSeconds": 20,
+              "successThreshold": 1,
+              "failureThreshold": 3
+            },
+            "readinessProbe": {
+              "httpGet": {
+                "path": "/health",
+                "port": "http",
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 20,
+              "timeoutSeconds": 3,
+              "periodSeconds": 20,
+              "successThreshold": 1,
+              "failureThreshold": 3
+            },
+            "resources": {
+              "limits": {
+                "cpu": "1000m",
+                "memory": "512Mi"
+              },
+              "requests": {
+                "cpu": "100m",
+                "memory": "384Mi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "mountPath": "/var/run/docker.sock",
+                "name": "docker-sock"
+              },
+              {
+                "name": "lff-sdm",
+                "mountPath": "/opt/atm",
+                "readOnly": true
+              }
+            ]
+          }
+        ],
+        "volumes": [
+          {
+            "hostPath": {
+              "path": "/var/run/docker.sock"
+            },
+            "name": "docker-sock"
+          },
+          {
+            "name": "lff-sdm",
+            "secret": {
+              "secretName": "lff-sdm"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
