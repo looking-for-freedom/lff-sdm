@@ -100,9 +100,7 @@ const BuildSelf: ExecuteGoal = async gi => {
     };
     return gi.configuration.sdm.projectLoader.doWithProject<ExecuteGoalResult>(params, async p => {
         try {
-            const version = "1.0.0-" + formatDate();
             const commands = [
-                { cmd: "npm", args: ["version", "--no-git-tag-version", version] },
                 { cmd: "npm", args: ["ci"] },
                 { cmd: "npm", args: ["run", "compile"] },
                 { cmd: "docker", args: ["build", "-t", image, "."] },
