@@ -104,7 +104,7 @@ const BuildSelf: ExecuteGoal = async gi => {
             const commands = [
                 { cmd: "npm", args: ["version", "--no-git-tag-version", version] },
                 { cmd: "npm", args: ["ci"] },
-                { cmd: "npm", args: ["compile"] },
+                { cmd: "npm", args: ["run", "compile"] },
                 { cmd: "docker", args: ["build", "-t", image, "."] },
             ];
             for (const c of commands) {
