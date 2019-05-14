@@ -28,7 +28,7 @@
     "@atomist/automation-client": "^1.4.0",
     "@atomist/sdm": "^1.4.1",
     "@atomist/sdm-core": "^1.4.0",
-    "@atomist/sdm-pack-k8s": "^1.4.2"
+    "@atomist/sdm-pack-k8s": "1.5.0-repo-sync-45.20190514213513"
   },
   "devDependencies": {
     "@atomist/sdm-local": "^1.0.6",
