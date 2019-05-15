@@ -12,7 +12,7 @@
             "env": [
               {
                 "name": "ATOMIST_CONFIG_PATH",
-                "value": "/opt/atm/atomist-config.json"
+                "value": "/opt/atm/client.config.json"
               },
               {
                 "name": "ATOMIST_GOAL_LAUNCHER",
