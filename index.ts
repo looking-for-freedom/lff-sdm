@@ -114,8 +114,8 @@ const BuildSelf: ExecuteGoal = async gi => {
         try {
             const commands = [
                 { cmd: "npm", args: ["ci"], env: { ...process.env, NODE_ENV: "development" } },
-                { cmd: "npm", args: ["run", "compile"], env: process.env },
-                { cmd: "docker", args: ["build", "-t", image, "."], env: process.env },
+                { cmd: "npm", args: ["run", "compile"] },
+                { cmd: "docker", args: ["build", "-t", image, "."] },
             ];
             for (const c of commands) {
                 const result = await spawnLog(c.cmd, c.args, { cwd: p.baseDir, env: c.env, log });
