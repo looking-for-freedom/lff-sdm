@@ -113,12 +113,12 @@ const BuildSelf: ExecuteGoal = async gi => {
     return gi.configuration.sdm.projectLoader.doWithProject<ExecuteGoalResult>(params, async p => {
         try {
             const commands = [
-                { cmd: "npm", args: ["ci"] },
-                { cmd: "npm", args: ["run", "compile"] },
-                { cmd: "docker", args: ["build", "-t", image, "."] },
+                { cmd: "npm", args: ["ci"], env: { ...process.env, NODE_ENV: "development" } },
+                { cmd: "npm", args: ["run", "compile"], env: process.env },
+                { cmd: "docker", args: ["build", "-t", image, "."], env: process.env },
             ];
             for (const c of commands) {
-                const result = await spawnLog(c.cmd, c.args, { cwd: p.baseDir, log });
+                const result = await spawnLog(c.cmd, c.args, { cwd: p.baseDir, env: c.env, log });
                 if (result.code) {
                     return { ...result };
                 }
