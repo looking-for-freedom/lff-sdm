@@ -72,7 +72,7 @@ function machine(cfg: SoftwareDeliveryMachineConfiguration): SoftwareDeliveryMac
     const selfBuild = new GoalWithFulfillment({
         uniqueName: "selfBuilder",
         environment: IndependentOfEnvironment,
-        displayName: "build",
+        displayName: "Build",
         workingDescription: "Building",
         completedDescription: "Built",
         failedDescription: "Build failed",
