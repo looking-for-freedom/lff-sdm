@@ -134,5 +134,5 @@ const BuildSelf: ExecuteGoal = async gi => {
 
 async function k8sAppData(app: KubernetesApplication): Promise<KubernetesApplication> {
     app.deploymentSpec.spec.template.metadata.annotations["atomist.com/ts"] = formatDate();
-    return { ...app, image, ns: "sdm", port: 2866 };
+    return { ...app, image, ns: "xdm", port: 2866 };
 }
