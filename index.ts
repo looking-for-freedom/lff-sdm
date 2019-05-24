@@ -38,12 +38,13 @@ import {
     Version,
 } from "@atomist/sdm-core";
 import {
+    k8sSupport,
     KubernetesApplication,
     KubernetesDeploy,
 } from "@atomist/sdm-pack-k8s";
 
 /**
- * The starting point for building an SDM is here!
+ * The starting point for building an SDM is `configureSdm`.
  */
 export const configuration: Configuration = {
     postProcessors: [
@@ -52,9 +53,9 @@ export const configuration: Configuration = {
 };
 
 /**
- * Initialize an sdm definition, and add functionality to it.
+ * Initialize an SDM definition, and add functionality to it.
  *
- * @param configuration All the configuration for this service
+ * @param configuration Configuration for this SDM
  */
 function machine(cfg: SoftwareDeliveryMachineConfiguration): SoftwareDeliveryMachine {
 
@@ -83,17 +84,20 @@ function machine(cfg: SoftwareDeliveryMachineConfiguration): SoftwareDeliveryMac
         logInterpreter: LogSuppressor,
     });
     const selfDeploy = new KubernetesDeploy({ environment: "production" })
-        .with({ name: "@atomist/k8s-sdm_minikube", applicationData: k8sAppData });
+        .with({ applicationData: k8sAppData });
     const selfGoalSet = goals("Self Build")
         .plan(version)
         .plan(selfBuild).after(version)
         .plan(selfDeploy).after(selfBuild);
+    const selfTest = pushTest("SDM, build thyself", async p => p.id.repo === "lff-sdm" && p.id.owner === "looking-for-freedom");
     sdm.addGoalContributions(whenPushSatisfies(selfTest).setGoals(selfGoalSet));
+
+    if (sdm.configuration.sdm.k8s && sdm.configuration.sdm.k8s.options) {
+        sdm.addExtensionPacks(k8sSupport(sdm.configuration.sdm.k8s.options));
+    }
 
     return sdm;
 }
-
-const selfTest = pushTest("SDM, build thyself", async p => p.id.repo === "lff-sdm" && p.id.owner === "looking-for-freedom");
 
 const image = "atmhoff/lff-sdm:1.0.0";
 
@@ -134,5 +138,5 @@ const BuildSelf: ExecuteGoal = async gi => {
 
 async function k8sAppData(app: KubernetesApplication): Promise<KubernetesApplication> {
     app.deploymentSpec.spec.template.metadata.annotations["atomist.com/ts"] = formatDate();
-    return { ...app, image, ns: "xdm", port: 2866 };
+    return { ...app, image, ns: "lff", port: 2866 };
 }
