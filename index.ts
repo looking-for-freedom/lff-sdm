@@ -118,16 +118,21 @@ const BuildSelf: ExecuteGoal = async gi => {
     };
     return gi.configuration.sdm.projectLoader.doWithProject<ExecuteGoalResult>(params, async p => {
         try {
-            const commands = (await p.hasFile(".fail")) ? [{ cmd: "false", args: [] }] :
-                [
+            if (await p.hasFile(".error")) {
+                throw new Error("Build .error");
+            } else if (await p.hasFile(".fail")) {
+                return { code: 9, message: "Build .fail" };
+            } else {
+                const commands = [
                     { cmd: "npm", args: ["ci"], env: { ...process.env, NODE_ENV: "development" } },
                     { cmd: "npm", args: ["run", "compile"] },
                     { cmd: "docker", args: ["build", "-t", image, "."] },
                 ];
-            for (const c of commands) {
-                const result = await spawnLog(c.cmd, c.args, { cwd: p.baseDir, env: c.env, log });
-                if (result.code) {
-                    return { ...result };
+                for (const c of commands) {
+                    const result = await spawnLog(c.cmd, c.args, { cwd: p.baseDir, env: c.env, log });
+                    if (result.code) {
+                        return { ...result };
+                    }
                 }
             }
             return { code: 0, message: `Built ${p.id.owner}/${p.id.repo} ` };
