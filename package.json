@@ -25,9 +25,9 @@
   "main": "./index.js",
   "types": "./index.d.ts",
   "dependencies": {
-    "@atomist/automation-client": "1.5.0-shutdown-543.20190524213735",
+    "@atomist/automation-client": "1.5.2-cancel-shutdown.20190530132807",
     "@atomist/sdm": "^1.4.1",
-    "@atomist/sdm-core": "^1.4.0",
+    "@atomist/sdm-core": "1.5.1-safer-exit.20190530134509",
     "@atomist/sdm-pack-k8s": "^1.5.0"
   },
   "devDependencies": {

@@ -35,6 +35,7 @@ import {
 import {
     configureSdm,
     createSoftwareDeliveryMachine,
+    k8sGoalSchedulingSupport,
     Version,
 } from "@atomist/sdm-core";
 import {
@@ -92,6 +93,7 @@ function machine(cfg: SoftwareDeliveryMachineConfiguration): SoftwareDeliveryMac
     const selfTest = pushTest("SDM, build thyself", async p => p.id.repo === "lff-sdm" && p.id.owner === "looking-for-freedom");
     sdm.addGoalContributions(whenPushSatisfies(selfTest).setGoals(selfGoalSet));
 
+    sdm.addExtensionPacks(k8sGoalSchedulingSupport());
     if (sdm.configuration.sdm.k8s && sdm.configuration.sdm.k8s.options) {
         sdm.addExtensionPacks(k8sSupport(sdm.configuration.sdm.k8s.options));
     }
@@ -116,11 +118,12 @@ const BuildSelf: ExecuteGoal = async gi => {
     };
     return gi.configuration.sdm.projectLoader.doWithProject<ExecuteGoalResult>(params, async p => {
         try {
-            const commands = [
-                { cmd: "npm", args: ["ci"], env: { ...process.env, NODE_ENV: "development" } },
-                { cmd: "npm", args: ["run", "compile"] },
-                { cmd: "docker", args: ["build", "-t", image, "."] },
-            ];
+            const commands = (await p.hasFile(".fail")) ? [{ cmd: "false", args: [] }] :
+                [
+                    { cmd: "npm", args: ["ci"], env: { ...process.env, NODE_ENV: "development" } },
+                    { cmd: "npm", args: ["run", "compile"] },
+                    { cmd: "docker", args: ["build", "-t", image, "."] },
+                ];
             for (const c of commands) {
                 const result = await spawnLog(c.cmd, c.args, { cwd: p.baseDir, env: c.env, log });
                 if (result.code) {
