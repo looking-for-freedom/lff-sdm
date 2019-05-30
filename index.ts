@@ -117,29 +117,31 @@ const BuildSelf: ExecuteGoal = async gi => {
         readOnly: false,
     };
     return gi.configuration.sdm.projectLoader.doWithProject<ExecuteGoalResult>(params, async p => {
+        if (await p.hasFile(".error")) {
+            log.write("Throwing error");
+            throw new Error("Build .error");
+        } else if (await p.hasFile(".fail")) {
+            log.write("Returning non-zero code");
+            return { code: 9, message: "Build .fail" };
+        }
         try {
-            if (await p.hasFile(".error")) {
-                throw new Error("Build .error");
-            } else if (await p.hasFile(".fail")) {
-                return { code: 9, message: "Build .fail" };
-            } else {
-                const commands = [
-                    { cmd: "npm", args: ["ci"], env: { ...process.env, NODE_ENV: "development" } },
-                    { cmd: "npm", args: ["run", "compile"] },
-                    { cmd: "docker", args: ["build", "-t", image, "."] },
-                ];
-                for (const c of commands) {
-                    const result = await spawnLog(c.cmd, c.args, { cwd: p.baseDir, env: c.env, log });
-                    if (result.code) {
-                        return { ...result };
-                    }
+            const commands = [
+                { cmd: "npm", args: ["ci"], env: { ...process.env, NODE_ENV: "development" } },
+                { cmd: "npm", args: ["run", "compile"] },
+                { cmd: "docker", args: ["build", "-t", image, "."] },
+            ];
+            for (const c of commands) {
+                const result = await spawnLog(c.cmd, c.args, { cwd: p.baseDir, env: c.env, log });
+                if (result.code) {
+                    return { ...result };
                 }
             }
             return { code: 0, message: `Built ${p.id.owner}/${p.id.repo} ` };
         } catch (e) {
             e.message = `Failed to execute goal: ${e.message}`;
+            log.write(e.message);
             logger.error(e.message);
-            return { code: 0, message: e.message };
+            return { code: 1, message: e.message };
         }
     });
 };
