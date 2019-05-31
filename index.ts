@@ -136,7 +136,7 @@ const BuildSelf: ExecuteGoal = async gi => {
                     return { ...result };
                 }
             }
-            return { code: 0, message: `Built ${p.id.owner}/${p.id.repo} ` };
+            return { code: 0, message: `Built ${p.id.owner}/${p.id.repo}` };
         } catch (e) {
             e.message = `Failed to execute goal: ${e.message}`;
             log.write(e.message);
