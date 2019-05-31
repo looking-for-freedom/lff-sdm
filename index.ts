@@ -35,6 +35,7 @@ import {
 import {
     configureSdm,
     createSoftwareDeliveryMachine,
+    goalStateSupport,
     k8sGoalSchedulingSupport,
     Version,
 } from "@atomist/sdm-core";
@@ -93,7 +94,7 @@ function machine(cfg: SoftwareDeliveryMachineConfiguration): SoftwareDeliveryMac
     const selfTest = pushTest("SDM, build thyself", async p => p.id.repo === "lff-sdm" && p.id.owner === "looking-for-freedom");
     sdm.addGoalContributions(whenPushSatisfies(selfTest).setGoals(selfGoalSet));
 
-    sdm.addExtensionPacks(k8sGoalSchedulingSupport());
+    sdm.addExtensionPacks(goalStateSupport(), k8sGoalSchedulingSupport());
     if (sdm.configuration.sdm.k8s && sdm.configuration.sdm.k8s.options) {
         sdm.addExtensionPacks(k8sSupport(sdm.configuration.sdm.k8s.options));
     }
